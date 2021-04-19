@@ -88,6 +88,7 @@ function setUpAioxmppEnvironment {
 	else
     	git clone -b devel https://github.com/horazont/aioxmpp "${AIOXMPPDIR}"
     	pushd "${AIOXMPPDIR}"
+	git checkout tags/v0.12.0
 	fi
     which pip3
 	pip3 install setuptools
