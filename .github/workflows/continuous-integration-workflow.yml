@@ -54,7 +54,7 @@ jobs:
   aioxmpp:
 
     name: Execute aioxmpp-based CI tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     needs: build
 
     steps:
