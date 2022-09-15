@@ -21,6 +21,12 @@ jobs:
         name: Compute needed variables
         run: |
           set -x
+          id=$(echo ${{ github.repository }} | cut -d- -f2)
+          echo "::set-output name=id::$id"
+          echo "id is '$id'"
+          tag=$(echo ${{ github.ref }} | cut -d '/' -f3)
+          echo "::set-output name=tag::$tag"
+          echo "tag is '$tag'"
           version=$(echo ${{ github.ref }} | cut -d '/' -f3 | cut -c 2- | sed 's/\./_/g')
           echo "::set-output name=version::$version"
           echo "version is '$version'"
