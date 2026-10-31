@@ -227,21 +227,22 @@ public class CertificateManager {
     /**
      * Verifies that the given X.509 certificate is valid for the specified hostname. The certificate's
      * server identities are checked against the hostname, with support for wildcard certificates.
-     * A wildcard identity (e.g. {@code *.example.com}) matches any direct subdomain of the base domain.
-     *
-     * Note that the implementation is more permissive than this: see OF-3125.
+     * A wildcard identity (e.g. {@code *.example.com}) matches any direct subdomain of the base domain: the wildcard
+     * stands for exactly one label (RFC 6125, section 6.4.3). It matches neither the base domain itself, nor a
+     * subdomain of a subdomain (OF-3125).
      *
      * @param trustedCert the X.509 certificate to verify (cannot be null)
      * @param hostname    the hostname to verify the certificate against (cannot be null)
      * @return {@code true} if the certificate is valid for the given hostname; {@code false} otherwise
      */
     public static boolean verifyCertificate(X509Certificate trustedCert, String hostname) {
+        final int firstDot = hostname.indexOf('.');
         for (String identity : getServerIdentities(trustedCert)) {
             // Verify that either the identity is the same as the hostname, or for wildcarded
-            // identities that the hostname ends with .domainspecified or -is- domainspecified.
+            // identities that the hostname, with its (non-empty) first label removed, is .domainspecified.
             if ((identity.startsWith("*.")
-                && (hostname.endsWith(identity.replace("*.", "."))
-                || hostname.equals(identity.replace("*.", ""))))
+                && firstDot > 0
+                && hostname.substring(firstDot).equals(identity.substring(1)))
                 || hostname.equals(identity)) {
                 return true;
             }

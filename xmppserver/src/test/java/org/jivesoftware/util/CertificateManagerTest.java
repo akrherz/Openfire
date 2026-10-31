@@ -896,6 +896,38 @@ public class CertificateManagerTest
     }
 
     /**
+     * A wildcard identity must not be accepted for the domain that it wildcards: the wildcard stands for a label, which
+     * the base domain does not have (RFC 6125, section 6.4.3).
+     */
+    @Test
+    public void testVerifyCertificateWildcardRejectsBaseDomain() throws Exception
+    {
+        // Setup fixture.
+        final X509Certificate cert = certificateWithDnsNames( "*.example.org" );
+
+        // Execute system under test & verify result.
+        assertFalse( CertificateManager.verifyCertificate( cert, "example.org" ), "Did not expect a wildcard identity to be accepted for the domain that it wildcards (but it was)." );
+        assertFalse( CertificateManager.verifyCertificate( cert, ".example.org" ), "Did not expect a wildcard identity to be accepted for a name of which the first label is empty (but it was)." );
+    }
+
+    /**
+     * A wildcard identity must not be accepted for a subdomain of a subdomain: the wildcard stands for exactly one label
+     * (RFC 6125, section 6.4.3).
+     */
+    @Test
+    public void testVerifyCertificateWildcardRejectsMultipleLabels() throws Exception
+    {
+        // Setup fixture.
+        final X509Certificate cert = certificateWithDnsNames( "*.example.org" );
+
+        // Execute system under test.
+        final boolean result = CertificateManager.verifyCertificate( cert, "deeper.yourdomain.example.org" );
+
+        // Verify result.
+        assertFalse( result, "Did not expect a wildcard identity to be accepted for a subdomain of a subdomain (but it was)." );
+    }
+
+    /**
      * Returns a certificate whose subject alternative names are the given DNS entries. Supplying none produces a
      * certificate that carries no subject alternative name extension at all.
      *
